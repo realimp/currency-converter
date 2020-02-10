@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}"/>
+
+    <title>Конвертер Валют</title>
+</head>
+<body>
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h1>Конвертер валют</h1>
+            <form th:action="@{/convert}" method="post">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <select id="inputFrom" class="form-control">
+                            <option selected>Choose...</option>
+                            <option>...</option>
+                        </select>
+                        <input type="number" class="form-control" id="amount">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <select id="inputTo" class="form-control">
+                            <option selected>Choose...</option>
+                            <option>...</option>
+                        </select>
+                        <input type="number" class="form-control" id="result">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-6 col-sm-offset-3">
+                            <input type="submit"
+                                   name="convert-submit"
+                                   id="convert-submit"
+                                   class="form-control btn btn-info"
+                                   value="Конвертировать"/>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+</div>
+
+</body>
+</html>
