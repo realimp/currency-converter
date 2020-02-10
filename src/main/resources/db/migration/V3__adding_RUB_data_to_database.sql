@@ -1,0 +1,1 @@
+INSERT INTO currencies (num_code, char_code, nominal, name) VALUES ('643', 'RUB', 1, 'Российский рубль');

@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import pro.nikolaev.currencyconverter.dto.UserRegistrationDto;
 import pro.nikolaev.currencyconverter.entities.Person;
-import pro.nikolaev.currencyconverter.repositories.PersonRepository;
-import pro.nikolaev.currencyconverter.security.CustomUserDetails;
+import pro.nikolaev.currencyconverter.services.AccountService;
 
 import javax.validation.Valid;
 
@@ -18,10 +17,7 @@ import javax.validation.Valid;
 public class AccountController {
 
     @Autowired
-    private CustomUserDetails userDetails;
-
-    @Autowired
-    private PersonRepository personRepository;
+    private AccountService accountService;
 
     @ModelAttribute("user")
     public UserRegistrationDto userRegistrationDto() {
@@ -40,7 +36,7 @@ public class AccountController {
 
     @PostMapping("/registration")
     public String registerUserAccount(@ModelAttribute("user") @Valid UserRegistrationDto userDto, BindingResult result) {
-        Person existing = personRepository.findByEmail(userDto.getEmail());
+        Person existing = accountService.findByEmail(userDto.getEmail());
         if (existing != null) {
             result.rejectValue("email", null, "Account with this email already registered!");
         }
@@ -48,7 +44,7 @@ public class AccountController {
             return "registration";
         }
 
-        userDetails.save(userDto);
+        accountService.save(userDto);
         return "redirect:/";
     }
 }

@@ -13,6 +13,7 @@ public class Currency {
     private String numCode;
     private String charCode;
     private int nominal;
+    private String name;
 
     @OneToMany(mappedBy = "currency", fetch = FetchType.LAZY)
     private List<CurrencyValue> values;
@@ -47,6 +48,14 @@ public class Currency {
 
     public void setNominal(int nominal) {
         this.nominal = nominal;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<CurrencyValue> getValues() {
