@@ -6,17 +6,17 @@ import javax.validation.constraints.NotEmpty;
 
 public class UserRegistrationDto {
 
-    @NotEmpty
+    @NotEmpty(message = "Это обязательное поле")
     private String password;
 
-    @NotEmpty
+    @NotEmpty(message = "Это обязательное поле")
     private String confirmPassword;
 
-    @Email
-    @NotEmpty
+    @Email(message = "Введен не допустимый email")
+    @NotEmpty(message = "Это обязательное поле")
     private String email;
 
-    @AssertTrue
+    @AssertTrue(message = "Нужно принят лицензионное соглашение")
     private Boolean terms;
 
     public String getPassword() {

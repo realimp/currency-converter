@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}"/>
+
+    <title>Конвертер Валют</title>
+</head>
+<body>
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-3">
+            <h1>История</h1>
+            <form th:action="@{/history}" th:object="${filter}"  method="post">
+
+                <div class="form-row">
+                    <div class="form-group col-md-8 mb-2">
+                        <input th:field="*{date}" type="date" class="form-control">
+                    </div>
+                    <div class="form-group col-md-8 mb-3">
+                        <select th:field="*{currencyFromCode}" id="inputFrom" class="custom-select my-1 mr-sm-2">
+                            <option value="">Исходная валюта</option>
+                            <option th:each="currency : ${currenciesList}"
+                                    th:text="'(' + ${currency.charCode} + ') ' + ${currency.name}"
+                                    th:value="${currency.numCode}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-8 mb-3">
+                        <select th:field="*{currencyToCode}" id="inputTo" class="custom-select my-1 mr-sm-2">
+                            <option value="">Целевая валюта</option>
+                            <option th:each="currency : ${currenciesList}"
+                                    th:text="'(' + ${currency.charCode} + ') ' + ${currency.name}"
+                                    th:value="${currency.numCode}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-6 col-sm-offset-3">
+                            <input type="submit"
+                                   name="convert-submit"
+                                   id="convert-submit"
+                                   class="form-control btn btn-primary my-1"
+                                   value="Поиск"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <a href="/" th:href="@{/}">Вернуться в конвертер</a></span>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th> Исходная валюта </th>
+                        <th> Целевая валюта </th>
+                        <th> Исходная сумма </th>
+                        <th> Получаемая сумма </th>
+                        <th> Дата </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+<!--                    <tr th:if="${conversions.empty}">-->
+<!--                        <td colspan="5"> История отсутствует </td>-->
+<!--                    </tr>-->
+                    <tr th:each="conversion : ${conversions}">
+                        <td th:text="${conversion.currencyFrom}"></td>
+                        <td th:text="${conversion.currencyTo}"></td>
+                        <td th:text="${conversion.amount}"></td>
+                        <td th:text="${conversion.result}"></td>
+                        <td th:text="${conversion.date}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
+
+        </div>
+    </div>
+
+
+</div>
+
+</body>
+</html>

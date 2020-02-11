@@ -6,9 +6,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 import pro.nikolaev.currencyconverter.components.XmlHandler;
 import pro.nikolaev.currencyconverter.dto.ConversionDto;
+import pro.nikolaev.currencyconverter.dto.HistoryEntry;
+import pro.nikolaev.currencyconverter.dto.HistoryFilter;
 import pro.nikolaev.currencyconverter.entities.Conversion;
 import pro.nikolaev.currencyconverter.entities.Currency;
 import pro.nikolaev.currencyconverter.entities.CurrencyValue;
+import pro.nikolaev.currencyconverter.mappers.ConversionDtoMapper;
+import pro.nikolaev.currencyconverter.mappers.ConversionMapper;
 import pro.nikolaev.currencyconverter.repositories.ConversionRepository;
 import pro.nikolaev.currencyconverter.repositories.CurrencyRepository;
 import pro.nikolaev.currencyconverter.repositories.CurrencyValueRepository;
@@ -19,11 +23,13 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Calendar;
-import java.util.Date;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -44,6 +50,7 @@ public class CurrencyService {
     private XmlHandler xmlHandler;
 
     private SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+    private SimpleDateFormat historyFilterFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public void getCourses(String dateString) throws IOException, ParserConfigurationException, SAXException {
         URL url = new URL("http://www.cbr.ru/scripts/XML_daily.asp?date_req=" + dateString);
@@ -56,16 +63,17 @@ public class CurrencyService {
     }
 
     public List<Currency> getCurrenciesList() {
-        return currencyRepository.findAll();
+        return currencyRepository.findAll().stream()
+                .sorted(Comparator.comparing(Currency::getName)).collect(Collectors.toList());
     }
 
-    public Conversion convert(ConversionDto conversionDto) {
-        long amount = parseUserInput(conversionDto.getAmount().trim().replaceAll(",", "."));
+    public ConversionDto convert(ConversionDto conversionDto) throws ParserConfigurationException, SAXException, IOException {
+        long amount = (long) (conversionDto.getAmount() * 10000);
 
         Currency currencyFrom = currencyRepository.findByNumCode(conversionDto.getCurrencyFromCode()).get();
         Currency currencyTo = currencyRepository.findByNumCode(conversionDto.getCurrencyToCode()).get();
 
-        java.sql.Date date = getCurrencyValueDate();
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Optional<CurrencyValue> currencyFromOptional = currencyValueRepository.findByCurrencyIdAndDate(currencyFrom.getId(), date);
         Optional<CurrencyValue> currencyToOptional = currencyValueRepository.findByCurrencyIdAndDate(currencyTo.getId(), date);
 
@@ -83,28 +91,98 @@ public class CurrencyService {
             conversion.setDate(date);
             conversion.setUser(accountService.getCurrentUser());
 
-            conversionRepository.saveAndFlush(conversion);
+            return ConversionDtoMapper.getMapping(conversionRepository.saveAndFlush(conversion));
         }
 
-        return null;
+        getCourses(format.format(new Date()));
+
+        currencyFromOptional = currencyValueRepository.findByCurrencyIdAndDate(currencyFrom.getId(), date);
+        currencyToOptional = currencyValueRepository.findByCurrencyIdAndDate(currencyTo.getId(), date);
+
+        int fromValue = currencyFrom.getNumCode().equals("643") ? 1 : currencyFromOptional.get().getRubValue();
+        int toValue = currencyTo.getNumCode().equals("643") ? 1 : currencyToOptional.get().getRubValue();
+
+        long result = amount * fromValue / toValue;
+
+        Conversion conversion = new Conversion();
+        conversion.setCurrencyFrom(currencyFrom);
+        conversion.setCurrencyTo(currencyTo);
+        conversion.setAmount(amount);
+        conversion.setResult(result);
+        conversion.setDate(date);
+        conversion.setUser(accountService.getCurrentUser());
+
+        return ConversionDtoMapper.getMapping(conversionRepository.saveAndFlush(conversion));
     }
 
-    private long parseUserInput(String userInput) {
-        try {
-            return  (long) (Double.parseDouble(userInput) * 10000);
-        } catch (NumberFormatException ex) {}
-        return 0;
+    public List<HistoryEntry> getHistory() {
+        return conversionRepository.findByUserId(accountService.getCurrentUser().getId())
+                .stream()
+                .sorted(Comparator.comparing(Conversion::getDate))
+                .map(ConversionMapper::getMapping).collect(Collectors.toList());
     }
 
-    private java.sql.Date getCurrencyValueDate() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        int dayOfWeekIndex = calendar.get(Calendar.DAY_OF_WEEK);
-        if (dayOfWeekIndex == 0) {
-            return new java.sql.Date(System.currentTimeMillis() - (86400000 * 2));
-        } else if (dayOfWeekIndex == 6) {
-            return new java.sql.Date(System.currentTimeMillis() - 86400000);
+    public List<HistoryEntry> getHistory(HistoryFilter filter) throws ParseException {
+        int currentUserId = accountService.getCurrentUser().getId();
+        String currencyFromCode = filter.getCurrencyFromCode();
+        String currencyToCode = filter.getCurrencyToCode();
+
+        if (filter.getDate().length() != 0) {
+            java.sql.Date parsedDate = new java.sql.Date(historyFilterFormat.parse(filter.getDate()).getTime());
+            if (currencyFromCode.length() == 3 && currencyToCode.length() == 3) {
+                Currency currencyFrom = currencyRepository.findByNumCode(currencyFromCode).get();
+                Currency currencyTo = currencyRepository.findByNumCode(currencyToCode).get();
+
+                return conversionRepository.findByCurrencyFromAndCurrencyToAndDateAndUserId(currencyFrom,
+                        currencyTo, parsedDate, currentUserId)
+                        .stream()
+                        .sorted(Comparator.comparing(Conversion::getDate))
+                        .map(ConversionMapper::getMapping).collect(Collectors.toList());
+            }
+            if (currencyFromCode.length() == 0 && currencyToCode.length() == 3) {
+                Currency currencyTo = currencyRepository.findByNumCode(currencyToCode).get();
+
+                return conversionRepository.findByCurrencyToAndDateAndUserId(currencyTo, parsedDate, currentUserId)
+                        .stream()
+                        .sorted(Comparator.comparing(Conversion::getDate))
+                        .map(ConversionMapper::getMapping).collect(Collectors.toList());
+            }
+            if (currencyFromCode.length() == 3 && currencyToCode.length() == 0) {
+                Currency currencyFrom = currencyRepository.findByNumCode(currencyFromCode).get();
+
+                return conversionRepository.findByCurrencyFromAndDateAndUserId(currencyFrom, parsedDate, currentUserId)
+                        .stream()
+                        .sorted(Comparator.comparing(Conversion::getDate))
+                        .map(ConversionMapper::getMapping).collect(Collectors.toList());
+            }
+            return conversionRepository.findByDateAndUserId(parsedDate, currentUserId).stream()
+                    .map(ConversionMapper::getMapping).collect(Collectors.toList());
         }
-        return new java.sql.Date(System.currentTimeMillis());
+        if (currencyFromCode.length() == 3 && currencyToCode.length() == 3) {
+            Currency currencyFrom = currencyRepository.findByNumCode(currencyFromCode).get();
+            Currency currencyTo = currencyRepository.findByNumCode(currencyToCode).get();
+
+            return conversionRepository.findByCurrencyFromAndCurrencyToAndUserId(currencyFrom, currencyTo, currentUserId)
+                    .stream()
+                    .sorted(Comparator.comparing(Conversion::getDate))
+                    .map(ConversionMapper::getMapping).collect(Collectors.toList());
+        }
+        if (currencyFromCode.length() == 0 && currencyToCode.length() == 3) {
+            Currency currencyTo = currencyRepository.findByNumCode(currencyToCode).get();
+
+            return conversionRepository.findByCurrencyToAndUserId(currencyTo, currentUserId)
+                    .stream()
+                    .sorted(Comparator.comparing(Conversion::getDate))
+                    .map(ConversionMapper::getMapping).collect(Collectors.toList());
+        }
+        if (currencyFromCode.length() == 3 && currencyToCode.length() == 0) {
+            Currency currencyFrom = currencyRepository.findByNumCode(currencyFromCode).get();
+
+            return conversionRepository.findByCurrencyFromAndUserId(currencyFrom, currentUserId)
+                    .stream()
+                    .sorted(Comparator.comparing(Conversion::getDate))
+                    .map(ConversionMapper::getMapping).collect(Collectors.toList());
+        }
+        return getHistory();
     }
 }

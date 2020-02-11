@@ -11,8 +11,6 @@ import pro.nikolaev.currencyconverter.repositories.CurrencyRepository;
 import pro.nikolaev.currencyconverter.repositories.CurrencyValueRepository;
 
 import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,10 +26,8 @@ public class XmlHandler extends DefaultHandler {
     private Currency currency;
     private CurrencyValue currencyValue;
     private String elementValue;
-    private Date date;
+    private Date date = new Date(System.currentTimeMillis());
     private List<CurrencyValue> valueList;
-
-    private SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
 
     public XmlHandler() {
         valueList = new ArrayList<>();
@@ -45,13 +41,6 @@ public class XmlHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (currency == null) {
-            if (qName.equalsIgnoreCase("ValCurs")) {
-                try {
-                    date = new Date(format.parse(attributes.getValue("Date")).getTime());
-                } catch (ParseException ex) {
-                    ex.printStackTrace();
-                }
-            }
             if (qName.equalsIgnoreCase("Valute")) {
                 currency = new Currency();
             }
@@ -90,8 +79,10 @@ public class XmlHandler extends DefaultHandler {
                 break;
             case "VALUTE" :
                 currency = null;
+                break;
             case "VALCURS" :
                 currencyValueRepository.saveAll(valueList);
+                break;
         }
     }
 }

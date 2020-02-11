@@ -15,24 +15,36 @@
 
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <h1>Конвертер валют</h1>
+            <h1>Конвертер</h1>
             <form th:action="@{/}" th:object="${conversion}"  method="post">
+
+                <p class="error-message"
+                   th:if="${#fields.hasGlobalErrors()}"
+                   th:each="error : ${#fields.errors('global')}"
+                   th:text="${error}">Validation error</p>
+
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <select th:field="*{currencyFromCode}" id="inputFrom" class="form-control">
+                        <select th:field="*{currencyFromCode}" id="inputFrom" class="custom-select">
                             <option th:each="currency : ${currenciesList}"
-                                    th:text="${currency.name}"
+                                    th:text="'(' + ${currency.charCode} + ') ' + ${currency.name}"
                                     th:value="${currency.numCode}"></option>
                         </select>
-                        <input th:field="*{amount}" type="text" class="form-control" id="amount">
+                        <div class="form-group"
+                             th:classappend="${#fields.hasErrors('amount')}? 'has-error':''">
+                            <input th:field="*{amount}" type="text" class="form-control" id="amount">
+                            <p class="error-message"
+                               th:each="error : ${#fields.errors('amount')}"
+                               th:text="${error}">Validation error</p>
+                        </div>
                     </div>
                     <div class="form-group col-md-6">
-                        <select th:field="*{currencyToCode}" id="inputTo" class="form-control">
+                        <select th:field="*{currencyToCode}" id="inputTo" class="custom-select">
                             <option th:each="currency : ${currenciesList}"
-                                    th:text="${currency.name}"
+                                    th:text="'(' + ${currency.charCode} + ') ' + ${currency.name}"
                                     th:value="${currency.numCode}"></option>
                         </select>
-                        <input type="text" class="form-control" id="result">
+                        <input th:field="*{result}" type="text" class="form-control" id="result">
                     </div>
                 </div>
                 <div class="form-group">
@@ -41,10 +53,13 @@
                             <input type="submit"
                                    name="convert-submit"
                                    id="convert-submit"
-                                   class="form-control btn btn-info"
+                                   class="form-control btn btn-primary my-1"
                                    value="Конвертировать"/>
                         </div>
                     </div>
+                </div>
+                <div class="form-group">
+                    <a href="/history" th:href="@{/history}">История операций</a></span>
                 </div>
             </form>
         </div>
