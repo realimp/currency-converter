@@ -9,6 +9,7 @@ import pro.nikolaev.currencyconverter.services.CurrencyService;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.Date;
 import java.text.SimpleDateFormat;
 
 @Component
@@ -21,6 +22,6 @@ public class StartupApplicationListener {
 
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent event) throws ParserConfigurationException, SAXException, IOException {
-        //currencyService.getCourses(format.format(new Date()));
+        currencyService.getCourses(format.format(new Date()));
     }
 }

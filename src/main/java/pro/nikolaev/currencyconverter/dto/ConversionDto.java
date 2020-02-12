@@ -1,6 +1,6 @@
 package pro.nikolaev.currencyconverter.dto;
 
-import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.sql.Date;
@@ -9,8 +9,8 @@ public class ConversionDto {
     @NotEmpty(message = "Поле не может быть пустым")
     private String currencyFromCode;
 
-    @DecimalMin(value = "0.0", message = "Значение не может быть отрицательным")
     @NotNull
+    @Min(0)
     private double amount;
 
     @NotEmpty(message = "Поле не может быть пустым")
