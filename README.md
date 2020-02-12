@@ -1,7 +1,8 @@
 # Конвертер валют
  #### Рекомендации для сборки и запуска проекта:
-  - Создать сервере БД пользователия *networker* с паролем *sQzMaXd?PMqp8bZwafea*
-  или в файле *application.properties* заменить учетные данные пользователия
+  - JDK 11
+  - Создать сервере БД пользователия **networker** с паролем **sQzMaXd?PMqp8bZwafea**
+  или в файле **application.properties** заменить учетные данные пользователия
   ```sql
 CREATE ROLE networker WITH
 	LOGIN
@@ -13,7 +14,7 @@ CREATE ROLE networker WITH
 	CONNECTION LIMIT -1
 	PASSWORD 'xxxxxx';
 ```
-  - Создать на сервере БД пустую базу данных *currency_converter*
+  - Создать на сервере БД пустую базу данных **currency_converter**
   ```sql
 CREATE DATABASE currency_converter
     WITH 
@@ -21,5 +22,6 @@ CREATE DATABASE currency_converter
     ENCODING = 'UTF8'
     CONNECTION LIMIT = -1;
 ```
-  - Создание исполняемого jar командой  *mvn package spring-boot:repackage*
-
+  - Запуск из командной строки из корневой папки **./mvnw spring-boot:run** (**mvnw spring-boot:run** для Windows)
+  - Создание исполняемого jar командой  **./mvnw clean package** (**mvnw clean package** для Windows)
+  - Для тестирования приложения воспользоваться формой регистрации для создания нового пользователя
