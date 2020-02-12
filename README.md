@@ -23,5 +23,6 @@ CREATE DATABASE currency_converter
     CONNECTION LIMIT = -1;
 ```
   - Запуск из командной строки из корневой папки **./mvnw spring-boot:run** (**mvnw spring-boot:run** для Windows)
-  - Создание исполняемого jar командой  **./mvnw clean package** (**mvnw clean package** для Windows)
+  - Создание исполняемого **jar** командой  **./mvnw clean package** (**mvnw clean package** для Windows)
+  - Запуск **jar** файла из командной строки:     перейти в папку с **jar** файлом и воспользоваться командой **java -jar currency-converter-0.0.1-SNAPSHOT.jar**
   - Для тестирования приложения воспользоваться формой регистрации для создания нового пользователя
