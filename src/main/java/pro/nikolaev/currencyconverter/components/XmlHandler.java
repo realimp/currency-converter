@@ -10,6 +10,7 @@ import pro.nikolaev.currencyconverter.entities.CurrencyValue;
 import pro.nikolaev.currencyconverter.repositories.CurrencyRepository;
 import pro.nikolaev.currencyconverter.repositories.CurrencyValueRepository;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class XmlHandler extends DefaultHandler {
     private String elementValue;
     private Date date = new Date(System.currentTimeMillis());
     private List<CurrencyValue> valueList;
-
+    
     public XmlHandler() {
         valueList = new ArrayList<>();
     }
@@ -71,7 +72,7 @@ public class XmlHandler extends DefaultHandler {
             case "VALUE" :
                 currencyValue.setCurrency(currency);
                 currencyValue.setDate(date);
-                currencyValue.setRubValue(Integer.parseInt(elementValue.replaceAll(",", "")));
+                currencyValue.setRubValue(new BigDecimal(elementValue.replaceAll(",", ".")));
                 if (currencyValueRepository.findByCurrencyIdAndDate(currency.getId(), date).isEmpty()) {
                     valueList.add(currencyValue);
                 }

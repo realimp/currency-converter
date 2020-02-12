@@ -3,6 +3,8 @@ package pro.nikolaev.currencyconverter.dto;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
 import java.sql.Date;
 
 public class ConversionDto {
@@ -11,12 +13,12 @@ public class ConversionDto {
 
     @NotNull
     @Min(0)
-    private double amount;
+    private BigDecimal amount;
 
     @NotEmpty(message = "Поле не может быть пустым")
     private String currencyToCode;
 
-    private double result;
+    private BigDecimal result;
 
     private Date date;
 
@@ -28,11 +30,11 @@ public class ConversionDto {
         this.currencyFromCode = currencyFromCode;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
@@ -44,11 +46,11 @@ public class ConversionDto {
         this.currencyToCode = currencyToCode;
     }
 
-    public double getResult() {
+    public BigDecimal getResult() {
         return result;
     }
 
-    public void setResult(double result) {
+    public void setResult(BigDecimal result) {
         this.result = result;
     }
 
