@@ -1,6 +1,8 @@
 package pro.nikolaev.currencyconverter.entities;
 
 import javax.persistence.*;
+
+import java.math.BigDecimal;
 import java.sql.Date;
 
 @Entity
@@ -10,7 +12,7 @@ public class CurrencyValue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private int rubValue;
+    private BigDecimal rubValue;
 
     @Column(name = "value_date")
     private Date date;
@@ -27,11 +29,11 @@ public class CurrencyValue {
         this.id = id;
     }
 
-    public int getRubValue() {
+    public BigDecimal getRubValue() {
         return rubValue;
     }
 
-    public void setRubValue(int rubValue) {
+    public void setRubValue(BigDecimal rubValue) {
         this.rubValue = rubValue;
     }
 

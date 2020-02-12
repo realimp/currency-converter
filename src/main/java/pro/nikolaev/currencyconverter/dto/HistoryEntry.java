@@ -1,12 +1,13 @@
 package pro.nikolaev.currencyconverter.dto;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 
 public class HistoryEntry {
     private String currencyFrom;
     private String currencyTo;
-    private double amount;
-    private double result;
+    private BigDecimal amount;
+    private BigDecimal result;
     private Date date;
 
     public String getCurrencyFrom() {
@@ -25,19 +26,19 @@ public class HistoryEntry {
         this.currencyTo = currencyTo;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
-    public double getResult() {
+    public BigDecimal getResult() {
         return result;
     }
 
-    public void setResult(double result) {
+    public void setResult(BigDecimal result) {
         this.result = result;
     }
 

@@ -15,8 +15,8 @@ public class ConversionMapper {
 
         result.setCurrencyFrom("(" + currencyFrom.getNumCode() + ") " + currencyFrom.getName());
         result.setCurrencyTo("(" + currencyTo.getNumCode() + ") " + currencyTo.getName());
-        result.setAmount(((double) conversion.getAmount()) / 10000);
-        result.setResult(((double) conversion.getResult()) / 10000);
+        result.setAmount(conversion.getAmount());
+        result.setResult(conversion.getResult());
         result.setDate(conversion.getDate());
 
         return result;

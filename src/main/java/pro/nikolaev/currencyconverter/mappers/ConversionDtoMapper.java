@@ -11,8 +11,8 @@ public class ConversionDtoMapper {
 
         result.setCurrencyFromCode(conversion.getCurrencyFrom().getNumCode());
         result.setCurrencyToCode(conversion.getCurrencyTo().getNumCode());
-        result.setAmount(((double) conversion.getAmount()) / 10000);
-        result.setResult(((double) conversion.getResult()) / 10000);
+        result.setAmount(conversion.getAmount());
+        result.setResult(conversion.getResult());
         result.setDate(conversion.getDate());
 
         return result;

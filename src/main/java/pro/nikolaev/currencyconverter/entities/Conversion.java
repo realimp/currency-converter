@@ -1,6 +1,8 @@
 package pro.nikolaev.currencyconverter.entities;
 
 import javax.persistence.*;
+
+import java.math.BigDecimal;
 import java.sql.Date;
 
 @Entity
@@ -18,8 +20,8 @@ public class Conversion {
     @JoinColumn(name = "currency_to", referencedColumnName = "id")
     private Currency currencyTo;
 
-    private long amount;
-    private long result;
+    private BigDecimal amount;
+    private BigDecimal result;
 
     @Column(name = "conversion_date")
     private Date date;
@@ -52,19 +54,19 @@ public class Conversion {
         this.currencyTo = currencyTo;
     }
 
-    public long getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(long amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
-    public long getResult() {
+    public BigDecimal getResult() {
         return result;
     }
 
-    public void setResult(long result) {
+    public void setResult(BigDecimal result) {
         this.result = result;
     }
 

@@ -22,6 +22,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -68,7 +70,7 @@ public class CurrencyService {
     }
 
     public ConversionDto convert(ConversionDto conversionDto) throws ParserConfigurationException, SAXException, IOException {
-        long amount = (long) (conversionDto.getAmount() * 10000);
+        BigDecimal amount = conversionDto.getAmount();
 
         Currency currencyFrom = currencyRepository.findByNumCode(conversionDto.getCurrencyFromCode()).get();
         Currency currencyTo = currencyRepository.findByNumCode(conversionDto.getCurrencyToCode()).get();
@@ -78,10 +80,12 @@ public class CurrencyService {
         Optional<CurrencyValue> currencyToOptional = currencyValueRepository.findByCurrencyIdAndDate(currencyTo.getId(), date);
 
         if (currencyFromOptional.isPresent() && currencyToOptional.isPresent()) {
-            int fromValue = currencyFrom.getNumCode().equals("643") ? 1 : currencyFromOptional.get().getRubValue();
-            int toValue = currencyTo.getNumCode().equals("643") ? 1 : currencyToOptional.get().getRubValue();
+            BigDecimal fromValue = currencyFrom.getNumCode().equals("643") ? new BigDecimal("1") : currencyFromOptional.get().getRubValue();
+            BigDecimal toValue = currencyTo.getNumCode().equals("643") ? new BigDecimal("1") : currencyToOptional.get().getRubValue();
 
-            long result = amount * fromValue / toValue;
+            BigDecimal result = amount.multiply(fromValue).multiply(BigDecimal.valueOf(currencyFrom.getNominal()))
+                                .divide(toValue, 4, RoundingMode.HALF_UP)
+                                .divide(BigDecimal.valueOf(currencyTo.getNominal()), 4, RoundingMode.HALF_UP).setScale(4);
 
             Conversion conversion = new Conversion();
             conversion.setCurrencyFrom(currencyFrom);
@@ -99,10 +103,12 @@ public class CurrencyService {
         currencyFromOptional = currencyValueRepository.findByCurrencyIdAndDate(currencyFrom.getId(), date);
         currencyToOptional = currencyValueRepository.findByCurrencyIdAndDate(currencyTo.getId(), date);
 
-        int fromValue = currencyFrom.getNumCode().equals("643") ? 1 : currencyFromOptional.get().getRubValue();
-        int toValue = currencyTo.getNumCode().equals("643") ? 1 : currencyToOptional.get().getRubValue();
+        BigDecimal fromValue = currencyFrom.getNumCode().equals("643") ? new BigDecimal("1") : currencyFromOptional.get().getRubValue();
+        BigDecimal toValue = currencyTo.getNumCode().equals("643") ? new BigDecimal("1") : currencyToOptional.get().getRubValue();
 
-        long result = amount * fromValue / toValue;
+        BigDecimal result = amount.multiply(fromValue).multiply(BigDecimal.valueOf(currencyFrom.getNominal()))
+                                .divide(toValue, 4, RoundingMode.HALF_UP)
+                                .divide(BigDecimal.valueOf(currencyTo.getNominal()), 4, RoundingMode.HALF_UP).setScale(4);
 
         Conversion conversion = new Conversion();
         conversion.setCurrencyFrom(currencyFrom);
@@ -118,7 +124,7 @@ public class CurrencyService {
     public List<HistoryEntry> getHistory() {
         return conversionRepository.findByUserId(accountService.getCurrentUser().getId())
                 .stream()
-                .sorted(Comparator.comparing(Conversion::getDate))
+                .sorted(Comparator.comparing(Conversion::getId).reversed())
                 .map(ConversionMapper::getMapping).collect(Collectors.toList());
     }
 
@@ -136,7 +142,7 @@ public class CurrencyService {
                 return conversionRepository.findByCurrencyFromAndCurrencyToAndDateAndUserId(currencyFrom,
                         currencyTo, parsedDate, currentUserId)
                         .stream()
-                        .sorted(Comparator.comparing(Conversion::getDate))
+                        .sorted(Comparator.comparing(Conversion::getId).reversed())
                         .map(ConversionMapper::getMapping).collect(Collectors.toList());
             }
             if (currencyFromCode.length() == 0 && currencyToCode.length() == 3) {
@@ -144,7 +150,7 @@ public class CurrencyService {
 
                 return conversionRepository.findByCurrencyToAndDateAndUserId(currencyTo, parsedDate, currentUserId)
                         .stream()
-                        .sorted(Comparator.comparing(Conversion::getDate))
+                        .sorted(Comparator.comparing(Conversion::getId).reversed())
                         .map(ConversionMapper::getMapping).collect(Collectors.toList());
             }
             if (currencyFromCode.length() == 3 && currencyToCode.length() == 0) {
@@ -152,10 +158,11 @@ public class CurrencyService {
 
                 return conversionRepository.findByCurrencyFromAndDateAndUserId(currencyFrom, parsedDate, currentUserId)
                         .stream()
-                        .sorted(Comparator.comparing(Conversion::getDate))
+                        .sorted(Comparator.comparing(Conversion::getId).reversed())
                         .map(ConversionMapper::getMapping).collect(Collectors.toList());
             }
             return conversionRepository.findByDateAndUserId(parsedDate, currentUserId).stream()
+                    .sorted(Comparator.comparing(Conversion::getId).reversed())
                     .map(ConversionMapper::getMapping).collect(Collectors.toList());
         }
         if (currencyFromCode.length() == 3 && currencyToCode.length() == 3) {
@@ -164,7 +171,7 @@ public class CurrencyService {
 
             return conversionRepository.findByCurrencyFromAndCurrencyToAndUserId(currencyFrom, currencyTo, currentUserId)
                     .stream()
-                    .sorted(Comparator.comparing(Conversion::getDate))
+                    .sorted(Comparator.comparing(Conversion::getId).reversed())
                     .map(ConversionMapper::getMapping).collect(Collectors.toList());
         }
         if (currencyFromCode.length() == 0 && currencyToCode.length() == 3) {
@@ -172,7 +179,7 @@ public class CurrencyService {
 
             return conversionRepository.findByCurrencyToAndUserId(currencyTo, currentUserId)
                     .stream()
-                    .sorted(Comparator.comparing(Conversion::getDate))
+                    .sorted(Comparator.comparing(Conversion::getId).reversed())
                     .map(ConversionMapper::getMapping).collect(Collectors.toList());
         }
         if (currencyFromCode.length() == 3 && currencyToCode.length() == 0) {
@@ -180,7 +187,7 @@ public class CurrencyService {
 
             return conversionRepository.findByCurrencyFromAndUserId(currencyFrom, currentUserId)
                     .stream()
-                    .sorted(Comparator.comparing(Conversion::getDate))
+                    .sorted(Comparator.comparing(Conversion::getId).reversed())
                     .map(ConversionMapper::getMapping).collect(Collectors.toList());
         }
         return getHistory();
