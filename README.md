@@ -1,7 +1,7 @@
 # Конвертер валют
  #### Рекомендации для сборки и запуска проекта:
   - JDK 11
-  - Создать сервере БД пользователия **networker** с паролем **sQzMaXd?PMqp8bZwafea**
+  - Создать на сервере БД пользователия **networker** с паролем **sQzMaXd?PMqp8bZwafea**
   или в файле **application.properties** заменить учетные данные пользователия
   ```sql
 CREATE ROLE networker WITH
