@@ -44,5 +44,3 @@ CREATE DATABASE currency_converter
   - Запуск **jar** файла из командной строки:     перейти в папку с **jar** файлом и воспользоваться командой **java -jar currency-converter-0.0.1-SNAPSHOT.jar**
   - Для тестирования приложения воспользоваться формой регистрации для создания нового пользователя
   
-  ### Проект развернут на <a href="https://azure.microsoft.com/" target="_blank" rel="nofollow noopener"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Microsoft_Azure_Logo.svg/187px-Microsoft_Azure_Logo.svg.png" width="64"></a> и доступен по ссылке:    
-  http://currency-converter.nikolaev.pro
